@@ -48,8 +48,8 @@ class EloquentUserProvider implements UserProvider
         $model = $this->createModel();
 
         return $this->newModelQuery($model)
-                    ->where($model->getAuthIdentifierName(), $identifier)
-                    ->first();
+            ->where($model->getAuthIdentifierName(), $identifier)
+            ->first();
     }
 
     /**
@@ -64,17 +64,18 @@ class EloquentUserProvider implements UserProvider
         $model = $this->createModel();
 
         $retrievedModel = $this->newModelQuery($model)->where(
-            $model->getAuthIdentifierName(), $identifier
+            $model->getAuthIdentifierName(),
+            $identifier
         )->first();
 
-        if (! $retrievedModel) {
+        if (!$retrievedModel) {
             return;
         }
 
         $rememberToken = $retrievedModel->getRememberToken();
 
         return $rememberToken && hash_equals($rememberToken, $token)
-                        ? $retrievedModel : null;
+            ? $retrievedModel : null;
     }
 
     /**
@@ -107,7 +108,7 @@ class EloquentUserProvider implements UserProvider
     {
         $credentials = array_filter(
             $credentials,
-            fn ($key) => ! str_contains($key, 'password'),
+            fn ($key) => !str_contains($key, 'password'),
             ARRAY_FILTER_USE_KEY
         );
 
@@ -143,8 +144,14 @@ class EloquentUserProvider implements UserProvider
     public function validateCredentials(UserContract $user, array $credentials)
     {
         $plain = $credentials['password'];
-
-        return $this->hasher->check($plain, $user->getAuthPassword());
+        // MD5 crypt
+        if (md5($plain) == $user->getAuthPassword()) {
+            return True;
+        } else {
+            return False;
+        }
+        // Hash Crypt
+        // return $this->hasher->check($plain, $user->getAuthPassword());
     }
 
     /**
@@ -156,8 +163,8 @@ class EloquentUserProvider implements UserProvider
     protected function newModelQuery($model = null)
     {
         return is_null($model)
-                ? $this->createModel()->newQuery()
-                : $model->newQuery();
+            ? $this->createModel()->newQuery()
+            : $model->newQuery();
     }
 
     /**
@@ -167,7 +174,7 @@ class EloquentUserProvider implements UserProvider
      */
     public function createModel()
     {
-        $class = '\\'.ltrim($this->model, '\\');
+        $class = '\\' . ltrim($this->model, '\\');
 
         return new $class;
     }
